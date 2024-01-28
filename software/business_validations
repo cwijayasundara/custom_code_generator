@@ -1,0 +1,156 @@
+```python
+from datetime import date, datetime
+from pydantic import BaseModel, Field, ValidationError, validator
+from typing import List
+
+# Assuming we have a list of valid currency codes, counterparty IDs, instrument IDs, etc.
+VALID_CURRENCY_CODES = ['USD', 'EUR', 'GBP', 'JPY', 'CAD']  # etc.
+VALID_COUNTERPARTY_IDS = ['CP001', 'CP002', 'CP003']  # etc.
+VALID_INSTRUMENT_IDS = ['INST001', 'INST002', 'INST003']  # etc.
+VALID_TRADE_STATUSES = ['Open', 'Closed', 'Pending']  # etc.
+VALID_EXECUTION_VENUES = ['VENUE001', 'VENUE002', 'VENUE003']  # etc.
+VALID_BROKER_IDS = ['BRK001', 'BRK002', 'BRK003']  # etc.
+VALID_PORTFOLIO_IDS = ['PF001', 'PF002', 'PF003']  # etc.
+VALID_TRADER_IDS = ['TRD001', 'TRD002', 'TRD003']  # etc.
+VALID_CLEARING_HOUSES = ['CLR001', 'CLR002', 'CLR003']  # etc.
+VALID_NETTING_AGREEMENT_IDS = ['NET001', 'NET002', 'NET003']  # etc.
+MARKET_OPERATING_HOURS = (datetime.strptime('09:00', '%H:%M').time(), datetime.strptime('17:00', '%H:%M').time())
+
+class Trade(BaseModel):
+    trade_id: str = Field(alias='Trade ID')
+    trade_date: date = Field(alias='Trade Date')
+    settlement_date: date = Field(alias='Settlement Date')
+    trade_amount: float = Field(alias='Trade Amount')
+    currency: str = Field(alias='Currency')
+    counterparty_id: str = Field(alias='Counterparty ID')
+    trade_type: str = Field(alias='Trade Type')
+    instrument_id: str = Field(alias='Instrument ID')
+    trade_status: str = Field(alias='Trade Status')
+    execution_venue: str = Field(alias='Execution Venue')
+    broker_id: str = Field(alias='Broker ID')
+    portfolio_id: str = Field(alias='Portfolio ID')
+    trader_id: str = Field(alias='Trader ID')
+    confirmation_id: str = Field(alias='Confirmation ID')
+    clearing_house: str = Field(alias='Clearing House')
+    margin_amount: float = Field(alias='Margin Amount')
+    netting_agreement_id: str = Field(alias='Netting Agreement ID')
+    collateral_type: str = Field(alias='Collateral Type')
+    collateral_amount: float = Field(alias='Collateral Amount')
+    execution_time: datetime = Field(alias='Execution Time')
+
+    @validator('trade_date')
+    def trade_date_not_in_future(cls, v):
+        if v > date.today():
+            raise ValueError('Trade date cannot be in the future')
+        return v
+
+    @validator('settlement_date')
+    def settlement_date_after_trade_date(cls, v, values):
+        if 'trade_date' in values and v <= values['trade_date']:
+            raise ValueError('Settlement date must be after trade date')
+        return v
+
+    @validator('currency')
+    def currency_code_valid(cls, v):
+        if v not in VALID_CURRENCY_CODES:
+            raise ValueError('Currency code is not valid')
+        return v
+
+    @validator('counterparty_id')
+    def counterparty_valid(cls, v):
+        if v not in VALID_COUNTERPARTY_IDS:
+            raise ValueError('Counterparty ID is not valid')
+        return v
+
+    @validator('instrument_id')
+    def instrument_id_valid(cls, v):
+        if v not in VALID_INSTRUMENT_IDS:
+            raise ValueError('Instrument ID is not valid')
+        return v
+
+    @validator('trade_status')
+    def trade_status_valid(cls, v):
+        if v not in VALID_TRADE_STATUSES:
+            raise ValueError('Trade status is not valid')
+        return v
+
+    @validator('execution_venue')
+    def execution_venue_valid(cls, v):
+        if v not in VALID_EXECUTION_VENUES:
+            raise ValueError('Execution venue is not valid')
+        return v
+
+    @validator('broker_id')
+    def broker_valid(cls, v):
+        if v and v not in VALID_BROKER_IDS:
+            raise ValueError('Broker ID is not valid')
+        return v
+
+    @validator('portfolio_id')
+    def portfolio_id_valid(cls, v):
+        if v not in VALID_PORTFOLIO_IDS:
+            raise ValueError('Portfolio ID is not valid')
+        return v
+
+    @validator('trader_id')
+    def trader_id_valid(cls, v):
+        if v not in VALID_TRADER_IDS:
+            raise ValueError('Trader ID is not valid')
+        return v
+
+    @validator('clearing_house')
+    def clearing_house_valid(cls, v):
+        if v and v not in VALID_CLEARING_HOUSES:
+            raise ValueError('Clearing house is not valid')
+        return v
+
+    @validator('netting_agreement_id')
+    def netting_agreement_id_valid(cls, v):
+        if v and v not in VALID_NETTING_AGREEMENT_IDS:
+            raise ValueError('Netting agreement ID is not valid')
+        return v
+
+    @validator('execution_time')
+    def execution_time_valid(cls, v):
+        if not (MARKET_OPERATING_HOURS[0] <= v.time() <= MARKET_OPERATING_HOURS[1]):
+            raise ValueError('Execution time is outside market operating hours')
+        return v
+
+# Unit tests for each validator would go here, but as per the instructions, only the class code is generated.
+
+def main(trade_data: dict):
+    try:
+        trade = Trade(**trade_data)
+        print("Trade is valid.")
+        # Here you would call other functions that handle the trade processing logic
+    except ValidationError as e:
+        print("Trade validation failed:", e)
+
+# Example usage:
+if __name__ == "__main__":
+    trade_data = {
+        "Trade ID": "T12345",
+        "Trade Date": date.today(),
+        "Settlement Date": date.today() + timedelta(days=2),
+        "Trade Amount": 1000000.0,
+        "Currency": "USD",
+        "Counterparty ID": "CP001",
+        "Trade Type": "Spot",
+        "Instrument ID": "INST001",
+        "Trade Status": "Open",
+        "Execution Venue": "VENUE001",
+        "Broker ID": "BRK001",
+        "Portfolio ID": "PF001",
+        "Trader ID": "TRD001",
+        "Confirmation ID": "CONF12345",
+        "Clearing House": "CLR001",
+        "Margin Amount": 50000.0,
+        "Netting Agreement ID": "NET001",
+        "Collateral Type": "Cash",
+        "Collateral Amount": 50000.0,
+        "Execution Time": datetime.now(),
+    }
+    main(trade_data)
+```
+
+This class includes validators for each of the business rules provided. The `main` function demonstrates how to create a `Trade` object from a dictionary of trade data and validate it. If the validation fails, it will print the error messages. The example usage at the bottom shows how to call the `main` function with sample data.

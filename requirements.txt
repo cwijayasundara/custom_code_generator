@@ -1,0 +1,7 @@
+openai==1.10.0
+python-dotenv
+langchain==0.1.4
+langchain-openai
+pandas
+pyarrow
+streamlit

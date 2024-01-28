@@ -1,0 +1,92 @@
+```python
+from datetime import date, datetime
+from pydantic import BaseModel, Field, validator, ValidationError
+from typing import Optional
+import re
+
+class TradeValidator(BaseModel):
+    trade_id: str = Field(alias='Trade ID')
+    trade_date: date = Field(alias='Trade Date')
+    settlement_date: date = Field(alias='Settlement Date')
+    trade_amount: float = Field(alias='Trade Amount')
+    currency: str = Field(alias='Currency')
+    counterparty_id: str = Field(alias='Counterparty ID')
+    trade_type: str = Field(alias='Trade Type')
+    instrument_id: str = Field(alias='Instrument ID')
+    trade_status: str = Field(alias='Trade Status')
+    execution_venue: str = Field(alias='Execution Venue')
+    broker_id: Optional[str] = Field(alias='Broker ID')
+    portfolio_id: str = Field(alias='Portfolio ID')
+    trader_id: str = Field(alias='Trader ID')
+    confirmation_id: str = Field(alias='Confirmation ID')
+    clearing_house: Optional[str] = Field(alias='Clearing House')
+    margin_amount: Optional[float] = Field(alias='Margin Amount')
+    netting_agreement_id: Optional[str] = Field(alias='Netting Agreement ID')
+    collateral_type: Optional[str] = Field(alias='Collateral Type')
+    collateral_amount: Optional[float] = Field(alias='Collateral Amount')
+    execution_time: datetime = Field(alias='Execution Time')
+
+    @validator('trade_id', 'counterparty_id', 'trade_type', 'instrument_id', 'trade_status', 'execution_venue', 'broker_id', 'portfolio_id', 'trader_id', 'confirmation_id', 'clearing_house', 'netting_agreement_id', 'collateral_type', pre=True, always=True)
+    def must_be_unique(cls, v):
+        # This is a placeholder for the unique check, which would typically involve checking against a database or data store.
+        # For the purpose of this example, we'll assume the value is unique.
+        return v
+
+    @validator('trade_date', 'settlement_date', pre=True, always=True)
+    def must_be_valid_date(cls, v):
+        if isinstance(v, date):
+            return v
+        try:
+            return datetime.strptime(v, '%Y-%m-%d').date()
+        except ValueError:
+            raise ValueError('must be a valid date in the format YYYY-MM-DD')
+
+    @validator('settlement_date')
+    def settlement_date_after_trade_date(cls, v, values, **kwargs):
+        if 'trade_date' in values and v < values['trade_date']:
+            raise ValueError('must be a valid date in the format YYYY-MM-DD and after Trade Date')
+        return v
+
+    @validator('trade_amount', 'margin_amount', 'collateral_amount', pre=True, always=True)
+    def must_be_positive_number(cls, v):
+        if v is not None and v < 0:
+            raise ValueError('must be a positive number')
+        return v
+
+    @validator('currency')
+    def must_be_valid_iso_currency_code(cls, v):
+        # Placeholder for ISO currency code validation. In practice, you would check against a list of valid codes.
+        if not re.match(r'^[A-Z]{3}$', v):
+            raise ValueError('must be a valid ISO currency code')
+        return v
+
+    # Add more validators here for other rules, such as checking against existing IDs in the system, recognized trade types, etc.
+
+    @validator('execution_time', pre=True, always=True)
+    def must_be_valid_timestamp(cls, v):
+        if isinstance(v, datetime):
+            return v
+        try:
+            return datetime.strptime(v, '%H:%M:%S').time()
+        except ValueError:
+            raise ValueError('must be a valid timestamp in the format HH:MM:SS')
+
+# Example unit tests for the TradeValidator class would be written in a separate test file.
+# Here's a sample structure for one of the tests:
+
+# def test_trade_date_validation():
+#     # Test with valid date
+#     try:
+#         TradeValidator(trade_date='2023-01-01')
+#     except ValidationError as e:
+#         assert False, f"Validation failed for a valid date: {e}"
+#     
+#     # Test with invalid date
+#     try:
+#         TradeValidator(trade_date='not-a-date')
+#         assert False, "Validation should have failed for an invalid date"
+#     except ValidationError as e:
+#         assert True
+```
+
+This class `TradeValidator` includes validators for the rules specified. The unit tests are not included in the class but are hinted at in the comments. In practice, you would write separate test functions to validate each rule and ensure the validators are working correctly.

@@ -1,0 +1,28 @@
+```python
+from datetime import date, datetime
+from pydantic import BaseModel, Field
+
+class Trade(BaseModel):
+    trade_id: str = Field(alias='Trade ID')
+    trade_date: date = Field(alias='Trade Date')
+    settlement_date: date = Field(alias='Settlement Date')
+    trade_amount: float = Field(alias='Trade Amount')
+    currency: str = Field(alias='Currency')
+    counterparty_id: str = Field(alias='Counterparty ID')
+    trade_type: str = Field(alias='Trade Type')
+    instrument_id: str = Field(alias='Instrument ID')
+    trade_status: str = Field(alias='Trade Status')
+    execution_venue: str = Field(alias='Execution Venue')
+    broker_id: str = Field(alias='Broker ID')
+    portfolio_id: str = Field(alias='Portfolio ID')
+    trader_id: str = Field(alias='Trader ID')
+    confirmation_id: str = Field(alias='Confirmation ID')
+    clearing_house: str = Field(alias='Clearing House')
+    margin_amount: float = Field(alias='Margin Amount')
+    netting_agreement_id: str = Field(alias='Netting Agreement ID')
+    collateral_type: str = Field(alias='Collateral Type')
+    collateral_amount: float = Field(alias='Collateral Amount')
+    execution_time: datetime = Field(alias='Execution Time')
+```
+
+Please note that I've made some assumptions about the data types for each field based on their names. For example, I've assumed that `Trade Date` and `Settlement Date` are dates, `Execution Time` is a datetime, and any field with 'Amount' in the name is a float. Adjust the types as necessary to fit your actual data. Also, I've used the `Field` function from Pydantic to set an alias for each field that matches the names given in the list.
