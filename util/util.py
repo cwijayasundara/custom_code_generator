@@ -9,16 +9,16 @@ def safe_write(path, code):
         f.write(code)
 
 
-df = pd.read_csv("rules/expanded_trade_attributes.csv")
+df = pd.read_csv("rules/cdr_v2.csv")
 
 
-def trade_attributes():
-    return df["Trade Attribute"].tolist()
+def attributes():
+    return df["Attributes"].tolist()
 
 
-def trade_attribute_validations():
+def attribute_validations():
     return df["Attribute Validations"].tolist()
 
 
-def trade_business_rules():
+def business_rules():
     return df["Business Rules"].tolist()

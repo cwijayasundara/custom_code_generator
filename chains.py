@@ -5,71 +5,129 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-llm = ChatOpenAI(model_name='gpt-4-1106-preview',
+# gpt-4-0125-preview
+# gpt-3.5-turbo-0125
+
+llm = ChatOpenAI(model_name='gpt-4-0125-preview',
                  streaming=True,
                  callbacks=[StreamingStdOutCallbackHandler()],
                  temperature=0
                  )
 
-prompt = """System: You are an expert engineer in generating python code. Your job is to generate a pydentic class 
-definition based on the values in the comma separated string. Don't hesitate to make design choices if the initial 
-description doesn't provide enough information. Just generate the pydentic class definition and nothing else!!
+prompt = """
 
-Human: {input}
+System: 
+
+You are an expert Python engineer and your job is to generate a fully functional pydentic class based on the
+values in the comma separated string.
+
+ONLY RETURN THE FULLY FUNCTIONAL PYDENTIC CLASS AND NOTHING ELSE !
+
+input: {input}
 
 pydentic class:
+
 """
 
-pydentic_class_def_chain = LLMChain.from_string(
+pydentic_chain = LLMChain.from_string(
     llm=llm,
     template=prompt
 )
 
 prompt = """
-System: You are an expert engineer in generating python code. Your job is to generate a python class with 
-business logic based on the business rules in the comma separated string. 
-- break business functionality into multiple functions based on business logic and SOLID principles
-- generate unit tests for each function to make sure the function works correctly
-- generate a main function that calls all the functions in the correct order
-- use the Pydentic class definition generated in the previous step to create the input to the main function
-- use the attributes of the Pydentic class to generate the business logic
 
-pydentic class : {pydentic_class} 
+System: 
 
-Just generate the python code and nothing else!!
+You are an expert Python engineer and your job is to generate a fully functional attribute validation class based on the
+values in a list of strings {input}.
 
-generate a python service class to validate the business rules.
+Convert the list of strings to a comma separated string and use that as the input to generate the attribute validation.
 
-Human: {input}
+YOU ARE PROVIDED WITH THE PYDENTIC CLASS DEFINITION {pydentic_class} AND IMPORT
+THAT FROM YOUR ATTRIBUTE VALIDATION CLASS AND DO NOT GENERATE THE PYDENTIC CLASS DEFINITION AGAIN !!
 
-complete python class with business logic:
+ONLY RETURN THE FULLY FUNCTIONAL ATTRIBUTE VALIDATION CLASS AND NOTHING ELSE !
+
+input: {input}
+
+pydentic_class: {pydentic_class}
+
+attribute validation class:
+
 """
 
-business_class_def_chain = LLMChain.from_string(
+attribute_validation_chain = LLMChain.from_string(
     llm=llm,
     template=prompt
 )
 
 prompt = """
-System: You are an expert engineer in generating python code. Your job is to generate a python class with 
-input validations based on input validation rules in the comma separated string.
-- create a python class for for all the input validation rules with a function for each rule
-- generate unit tests for each function to make sure the functions are working correctly
-- use the Pydentic class definition passed as an input
-- use the attributes of the Pydentic class to generate the validation logic
 
-pydentic class : {pydentic_class} 
+System: 
 
-Just generate the python code and nothing else!!
+You are an expert Python engineer and your job is to generate a fully functional business validation class based on the
+values in the comma separated string {input}.
 
-generate a python attribute validation class to validate the attributes.
+YOU ARE PROVIDED WITH THE PYDENTIC CLASS DEFINITION {pydentic_class} AND IMPORT
+THAT FROM YOUR ATTRIBUTE VALIDATION CLASS AND DO NOT GENERATE THE PYDENTIC CLASS DEFINITION AGAIN !!
 
-Human: {input}
+ONLY RETURN THE FULLY FUNCTIONAL BUSINESS VALIDATION CLASS AND NOTHING ELSE !
 
-complete python class with input validation logic:
+input: {input}
+
+pydentic_class: {pydentic_class}
+
+business validation class:
+
 """
 
-input_validator_chain = LLMChain.from_string(
+business_validation_chain = LLMChain.from_string(
+    llm=llm,
+    template=prompt
+)
+
+prompt = """System:
+
+You are an expert Python engineer and your job is to develop a fully functional microservice to manage the provided 
+business entity class {pydentic_class}.
+
+Can you generate fully functional code for a RESTful controller class for the provided entity class {pydentic_class}?
+
+YOU ARE PROVIDED WITH THE PYDENTIC CLASS DEFINITION {pydentic_class} AND IMPORT
+THAT FROM YOUR ATTRIBUTE VALIDATION CLASS AND DO NOT GENERATE THE PYDENTIC CLASS DEFINITION AGAIN !!
+
+ONLY RETURN THE FULLY FUNCTIONAL RESTFUL CONTROLLER CLASS AND NOTHING ELSE !
+
+pydentic_class: {pydentic_class}
+
+controller class:
+
+"""
+
+controller_chain = LLMChain.from_string(
+    llm=llm,
+    template=prompt
+)
+
+prompt = """System:
+
+You are an expert Python engineer and your job is to develop a fully functional microservice to manage the provided 
+business entity class {pydentic_class}.
+
+Can you generate fully functional code for a data persistence  class for the provided entity class {pydentic_class}?
+
+YOU ARE PROVIDED WITH THE PYDENTIC CLASS DEFINITION {pydentic_class} AND IMPORT
+THAT FROM YOUR ATTRIBUTE VALIDATION CLASS AND DO NOT GENERATE THE PYDENTIC CLASS DEFINITION AGAIN !!
+
+ONLY RETURN THE FULLY FUNCTIONAL DATA PERSISTENCE CLASS AND NOTHING ELSE !
+
+pydentic_class: {pydentic_class}
+
+repository class:
+
+"""
+
+repository_chain = LLMChain.from_string(
     llm=llm,
     template=prompt
 )
